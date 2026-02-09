@@ -130,3 +130,8 @@ export async function isAuthenticated() {
   const user = await getCurrentUser();
   return !!user;
 }
+// Sign out user on server
+export async function serverLogout() {
+  const cookieStore = await cookies();
+  cookieStore.delete("session");
+}

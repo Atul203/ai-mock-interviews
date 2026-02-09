@@ -1,6 +1,6 @@
 // firebase/client.ts
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth ,GoogleAuthProvider} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -18,5 +18,6 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+export const googleProvider = new GoogleAuthProvider();
 
 export { app, auth, db };

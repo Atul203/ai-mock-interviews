@@ -8,6 +8,7 @@ import { auth } from "@/firebase/client";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 import {
   createUserWithEmailAndPassword,
@@ -89,11 +90,46 @@ const AuthForm = ({ type }: { type: FormType }) => {
         toast.success("Signed in successfully.");
         router.push("/");
       }
-    } catch (error) {
-      console.log(error);
-      toast.error(`There was an error: ${error}`);
+  } catch (error: any) {
+  console.error(error);
+
+  switch (error.code) {
+    case "auth/user-not-found":
+      toast.error("No account found. Please create an account first.");
+      break;
+    case "auth/wrong-password":
+      toast.error("Incorrect password. Please try again.");
+      break;
+    case "auth/email-already-in-use":
+      toast.error("This email is already registered. Please sign in instead.");
+      break;
+    default:
+      toast.error("Something went wrong. Please try again.");
+  }
+}
+  }
+    const handleGoogleSignIn = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      // Save user in your backend (optional, like you did in signUp/signIn)
+      await signIn({
+        email: user.email!,
+        idToken,
+      });
+
+      toast.success("Signed in with Google successfully.");
+      router.push("/");
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Google sign-in failed. Please try again.");
     }
   };
+
 
   const isSignIn = type === "sign-in";
 
@@ -141,6 +177,16 @@ const AuthForm = ({ type }: { type: FormType }) => {
             <Button className="btn" type="submit">
               {isSignIn ? "Sign In" : "Create an Account"}
             </Button>
+            <Button 
+  type="button" 
+  variant="outline" 
+  className="w-full mt-2 flex items-center gap-2"
+  onClick={handleGoogleSignIn}
+>
+  <Image src="/google.svg" alt="Google" width={20} height={20} />
+  Continue with Google
+</Button>
+
           </form>
         </Form>
 
